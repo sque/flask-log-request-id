@@ -196,7 +196,7 @@ workflows:
           filters:
             branches:
               only:
-                  - staging
+                  - deploy/staging
           requires:
             - build
 
@@ -209,11 +209,9 @@ workflows:
           requires:
             - build
           filters:
-            tags:
-              only:
-                  - /^v[\d\.]+$/
             branches:
-              only: master
+              only:
+                  - deploy/production
 
       - deploy_pypi:
           requires:
